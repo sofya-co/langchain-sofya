@@ -1,0 +1,61 @@
+# Publishes langchain-sofya to PyPI when a version tag (v0.1.0, ...) is pushed.
+#
+# Uses PyPI trusted publishing (no API token). On pypi.org, add a trusted
+# publisher (a "pending publisher" before the first release) with:
+#   Project name:  langchain-sofya
+#   Owner:         sofya-co
+#   Repository:    langchain-sofya
+#   Workflow:      publish.yml
+#   Environment:   pypi
+#
+# To release: bump langchain_sofya/_version.py, commit, then
+#   git tag v<version> && git push origin v<version>
+
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Check the tag matches the version
+        run: |
+          version=$(sed -n 's/^__version__ = "\(.*\)"/\1/p' langchain_sofya/_version.py)
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match version v$version"
+            exit 1
+          fi
+      - name: Test
+        run: |
+          uv sync --group test
+          uv run pytest tests/unit_tests --disable-socket --allow-unix-socket
+      - name: Build
+        run: uv build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

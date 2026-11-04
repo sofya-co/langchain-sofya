@@ -1,0 +1,67 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "langchain-sofya"
+dynamic = ["version"]
+description = "LangChain tools for Sofya: web search, page fetch, extraction and cited research for AI agents."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Sofya, Inc.", email = "contact@sofya.co" }]
+requires-python = ">=3.10"
+keywords = ["langchain", "sofya", "web search", "search api", "web scraping", "ai agents", "tools"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+dependencies = [
+    "langchain-core>=0.3.15,<2.0.0",
+    "httpx>=0.27.0,<1.0.0",
+    "pydantic>=2.7.4,<3.0.0",
+]
+
+[project.urls]
+Homepage = "https://sofya.co"
+Documentation = "https://sofya.co/docs"
+Repository = "https://github.com/sofya-co/langchain-sofya"
+Issues = "https://github.com/sofya-co/langchain-sofya/issues"
+
+[dependency-groups]
+test = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "pytest-socket>=0.7",
+    "langchain-tests>=0.3.20",
+]
+lint = ["ruff>=0.8", "mypy>=1.13"]
+
+[tool.hatch.version]
+path = "langchain_sofya/_version.py"
+
+[tool.hatch.build.targets.sdist]
+include = ["langchain_sofya", "tests", "README.md", "LICENSE"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "T201", "UP"]
+
+[tool.mypy]
+disallow_untyped_defs = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers --strict-config"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
